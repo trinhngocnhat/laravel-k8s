@@ -1,4 +1,31 @@
-vendor
+# Bỏ qua thư mục phụ thuộc
 node_modules
+vendor
+
+# Bỏ qua các file môi trường
 .env
-storage/logs
+.env.local
+.env.development
+.env.production
+.env.testing
+
+# Bỏ qua thư mục build cache
+npm-debug.log
+yarn-error.log
+composer.lock
+package-lock.json
+
+# Bỏ qua thư mục chứa dữ liệu runtime
+storage
+bootstrap/cache
+
+# Bỏ qua file hệ thống và IDE
+.DS_Store
+Thumbs.db
+.git
+.gitignore
+.idea
+.vscode
+
+# Docker build cache
+docker-compose.override.yml
