@@ -1,0 +1,92 @@
+# 🟢 MySQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:latest
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "rootpassword"
+        - name: MYSQL_DATABASE
+          value: "laravel_db"
+        - name: MYSQL_USER
+          value: "laravel"
+        - name: MYSQL_PASSWORD
+          value: "laravelpassword"
+        ports:
+        - containerPort: 3306
+---
+# 🟢 MySQL Service (ClusterIP)
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP
+---
+# 🟢 Laravel Deployment (Apache)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: laravel
+  template:
+    metadata:
+      labels:
+        app: laravel
+    spec:
+      containers:
+      - name: laravel
+        image: bitnami/laravel:latest
+        ports:
+        - containerPort: 8000  # Apache mặc định chạy trên cổng 8080
+        env:
+        - name: DB_CONNECTION
+          value: "mysql"
+        - name: DB_HOST
+          value: "mysql-service"
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_DATABASE
+          value: "laravel_db"
+        - name: DB_USERNAME
+          value: "laravel"
+        - name: DB_PASSWORD
+          value: "laravelpassword"
+---
+# 🟢 Laravel Service (NodePort)
+apiVersion: v1
+kind: Service
+metadata:
+  name: laravel-service
+spec:
+  selector:
+    app: laravel
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+      nodePort: 30080  # Expose cổng này ra bên ngoài
+  type: NodePort
